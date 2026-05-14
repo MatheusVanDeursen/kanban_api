@@ -33,7 +33,7 @@ Esta é a API RESTful construída para alimentar o projeto Kanban Board. Desenvo
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/SeuUsuario/kanban-api.git
+git clone https://github.com/MatheusVanDeursen/kanban_api
 cd kanban-api
 ```
 
