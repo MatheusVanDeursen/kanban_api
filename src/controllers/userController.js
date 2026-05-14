@@ -1,5 +1,8 @@
 const userService = require('../services/userService');
 const emailService = require('../services/emailService');
+const userRepository = require('../repositories/userRepository');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 class UserController {
     async register(req, res) {
@@ -75,6 +78,49 @@ class UserController {
         } catch (error) {
             console.error('Erro no login social:', error);
             return res.status(401).json({ error: 'Token do Google inválido ou expirado.' });
+        }
+    }
+
+    async requestPasswordReset(req, res) {
+        try {
+            const { email } = req.body;
+            const user = await userRepository.findByEmail(email);
+
+            if (!user) {
+                // Por segurança, não confirmamos se o e-mail existe ou não
+                return res.status(200).json({ message: 'Se o e-mail existir, um link foi enviado.' });
+            }
+
+            const token = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date(Date.now() + 3600000); // 1 hora a partir de agora
+
+            await userRepository.deleteResetTokens(user.id); // Limpa solicitações antigas
+            await userRepository.createPasswordReset(user.id, token, expiresAt);
+            
+            await emailService.sendResetEmail(email, token);
+
+            return res.status(200).json({ message: 'Instruções enviadas para o e-mail.' });
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao processar solicitação.' });
+        }
+    }
+
+    async resetPassword(req, res) {
+        try {
+            const { token, newPassword } = req.body;
+            const resetRequest = await userRepository.findResetToken(token);
+
+            if (!resetRequest) {
+                return res.status(400).json({ error: 'Token inválido ou expirado.' });
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            await userRepository.updatePassword(resetRequest.user_id, hashedPassword);
+            await userRepository.deleteResetTokens(resetRequest.user_id);
+
+            return res.status(200).json({ message: 'Senha atualizada com sucesso!' });
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao redefinir senha.' });
         }
     }
 

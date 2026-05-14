@@ -8,5 +8,7 @@ router.post('/signup', userController.register);
 router.post('/login', userController.login);
 router.get('/me', authMiddleware, userController.getMe);
 router.post('/auth/google', userController.googleLogin);
+router.post('/request-reset', userController.requestPasswordReset);
+router.post('/reset-password', userController.resetPassword);
 
 module.exports = router;

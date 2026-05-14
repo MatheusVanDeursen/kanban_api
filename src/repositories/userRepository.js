@@ -36,6 +36,33 @@ class UserRepository {
         const result = await db.query(query, [id]);
         return result.rows[0];
     }
+
+    async createPasswordReset(userId, token, expiresAt) {
+        const query = `
+            INSERT INTO password_resets (user_id, token, expires_at)
+            VALUES ($1, $2, $3)
+        `;
+        await db.query(query, [userId, token, expiresAt]);
+    }
+
+    async findResetToken(token) {
+        const query = `
+            SELECT * FROM password_resets 
+            WHERE token = $1 AND expires_at > NOW()
+            ORDER BY created_at DESC LIMIT 1
+        `;
+        const result = await db.query(query, [token]);
+        return result.rows[0];
+    }
+
+    async deleteResetTokens(userId) {
+        await db.query('DELETE FROM password_resets WHERE user_id = $1', [userId]);
+    }
+
+    async updatePassword(userId, hashedPassword) {
+        await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashedPassword, userId]);
+    }
+    
 }
 
 module.exports = new UserRepository();

@@ -43,6 +43,27 @@ class EmailService {
             return null; 
         }
     }
+
+    async sendResetEmail(userEmail, token) {
+        const resetLink = `http://127.0.0.1:5500/reset-password.html?token=${token}`;
+        
+        const mailOptions = {
+            from: `"Kanban App" <${process.env.EMAIL_USER}>`,
+            to: userEmail,
+            subject: 'Recuperação de Senha 🔐',
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+                    <h2 style="color: #e6b905;">Solicitação de nova senha</h2>
+                    <p>Você solicitou a recuperação de senha para sua conta no Kanban App.</p>
+                    <p>Clique no botão abaixo para escolher uma nova senha. Este link é válido por 1 hora.</p>
+                    <a href="${resetLink}" style="display: inline-block; background-color: #e6b905; color: #222438; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Recuperar Senha</a>
+                    <p>Se você não solicitou isso, pode ignorar este e-mail.</p>
+                </div>
+            `
+        };
+        return await this.transporter.sendMail(mailOptions);
+    }
+
 }
 
 module.exports = new EmailService();
