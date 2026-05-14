@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+const emailService = require('../services/emailService');
 
 class UserController {
     async register(req, res) {
@@ -9,7 +10,14 @@ class UserController {
                 return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
             }
 
+            // Cria o usuário no banco de dados
             const user = await userService.register(email, password);
+
+            // ==========================================
+            // DISPARA O E-MAIL DE BOAS VINDAS
+            // ==========================================
+            emailService.sendWelcomeEmail(user.email);
+
             return res.status(201).json(user); // 201 = Created
         } catch (error) {
             // Se o erro for de email já em uso (lançado pelo service)
@@ -69,7 +77,7 @@ class UserController {
             return res.status(401).json({ error: 'Token do Google inválido ou expirado.' });
         }
     }
-    
+
 }
 
 module.exports = new UserController();
