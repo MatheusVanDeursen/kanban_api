@@ -53,6 +53,23 @@ class UserController {
             return res.status(500).json({ error: 'Erro ao buscar dados do usuário.' });
         }
     }
+
+    async googleLogin(req, res) {
+        try {
+            const { token } = req.body; // Este é o token que o Front-end vai nos enviar
+
+            if (!token) {
+                return res.status(400).json({ error: 'Token do Google é obrigatório.' });
+            }
+
+            const data = await userService.googleLogin(token);
+            return res.status(200).json(data);
+        } catch (error) {
+            console.error('Erro no login social:', error);
+            return res.status(401).json({ error: 'Token do Google inválido ou expirado.' });
+        }
+    }
+    
 }
 
 module.exports = new UserController();

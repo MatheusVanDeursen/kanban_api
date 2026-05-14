@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userRepository = require('../repositories/userRepository');
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 require('dotenv').config();
 
 class UserService {
@@ -49,6 +51,42 @@ class UserService {
 
     async getMe(userId) {
         return await userRepository.findById(userId);
+    }
+
+    async googleLogin(googleIdToken) {
+        // 1. Pede para a biblioteca do Google verificar se o token é autêntico
+        const ticket = await googleClient.verifyIdToken({
+            idToken: googleIdToken,
+            audience: process.env.GOOGLE_CLIENT_ID, 
+        });
+        
+        // 2. Extrai os dados validados do Google
+        const payload = ticket.getPayload();
+        const email = payload.email;
+        const googleId = payload.sub; // 'sub' é o ID único do usuário no Google
+
+        // 3. Verifica se o usuário já existe no nosso banco
+        let user = await userRepository.findByEmail(email);
+
+        if (!user) {
+            // Se não existe, cria a conta automaticamente!
+            user = await userRepository.createSocialUser(email, 'google', googleId);
+        } else if (user.auth_provider === 'local') {
+            // Se ele já tinha uma conta com senha, podemos apenas logá-lo,
+            // ou você poderia fazer um UPDATE para vincular a conta do Google aqui.
+        }
+
+        // 4. Gera o NOSSO token (JWT do Kanban) para ele usar no sistema
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        return {
+            token,
+            user: { id: user.id, email: user.email }
+        };
     }
     
 }

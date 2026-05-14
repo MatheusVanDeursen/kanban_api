@@ -19,6 +19,17 @@ class UserRepository {
         return result.rows[0]; // Retorna o usuário criado (sem a senha)
     }
 
+    // Cria um usuário vindo de rede social
+    async createSocialUser(email, provider, providerId) {
+        const query = `
+            INSERT INTO users (email, auth_provider, provider_id)
+            VALUES ($1, $2, $3)
+            RETURNING id, email, created_at
+        `;
+        const result = await db.query(query, [email, provider, providerId]);
+        return result.rows[0];
+    }
+
     // Busca um usuário pelo ID
     async findById(id) {
         const query = 'SELECT id, email, created_at FROM users WHERE id = $1';
