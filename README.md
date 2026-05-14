@@ -31,7 +31,7 @@ Isso permite que a reordenação exija apenas um único `UPDATE` no banco de dad
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/SeuUsuario/kanban-api.git
+git clone https://github.com/MatheusVanDeursen/kanban_api
 cd kanban-api
 ```
 
