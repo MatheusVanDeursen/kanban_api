@@ -50,6 +50,7 @@ class ColumnController {
         }
     }
 
+    // PATCH /api/columns/:id
     async update(req, res) {
         try {
             const columnId = req.params.id;
@@ -68,6 +69,7 @@ class ColumnController {
         }
     }
 
+    // DELETE /api/columns/:id
     async delete(req, res) {
         try {
             const columnId = req.params.id;

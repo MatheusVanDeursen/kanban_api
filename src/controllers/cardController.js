@@ -42,6 +42,7 @@ class CardController {
         }
     }
 
+    // PATCH /api/cards/:id
     async update(req, res) {
         try {
             const cardId = req.params.id;
@@ -59,6 +60,7 @@ class CardController {
         }
     }
 
+    // DELETE /api/cards/:id
     async delete(req, res) {
         try {
             const cardId = req.params.id;

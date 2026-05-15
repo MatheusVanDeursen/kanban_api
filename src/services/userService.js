@@ -49,6 +49,7 @@ class UserService {
         };
     }
 
+    // Busca os dados do usuário pelo ID
     async getMe(userId) {
         return await userRepository.findById(userId);
     }

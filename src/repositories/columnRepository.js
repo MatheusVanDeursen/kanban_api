@@ -62,6 +62,7 @@ class ColumnRepository {
         return fullBoard;
     }
 
+    // Atualiza o título e/ou cor de uma coluna existente
     async update(columnId, userId, title, color) {
         const query = `
             UPDATE columns 
@@ -73,6 +74,7 @@ class ColumnRepository {
         return result.rows[0];
     }
 
+    // Remove uma coluna do banco de dados (e todos os cards associados, se houver cascata)
     async delete(columnId, userId) {
         const query = 'DELETE FROM columns WHERE id = $1 AND user_id = $2 RETURNING id';
         const result = await db.query(query, [columnId, userId]);

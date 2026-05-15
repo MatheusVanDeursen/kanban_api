@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
 class UserController {
+    // Registra um novo usuário no sistema
     async register(req, res) {
         try {
             const { email, password } = req.body;
@@ -31,6 +32,7 @@ class UserController {
         }
     }
 
+    // Realiza o login do usuário (autenticação local)
     async login(req, res) {
         try {
             const { email, password } = req.body;
@@ -49,6 +51,7 @@ class UserController {
         }
     }
 
+    // Retorna os dados do usuário atualmente autenticado
     async getMe(req, res) {
         try {
             // O id vem do authMiddleware (req.user.id)
@@ -65,6 +68,7 @@ class UserController {
         }
     }
 
+    // Realiza o login ou cadastro automático via Google
     async googleLogin(req, res) {
         try {
             const { token } = req.body; // Este é o token que o Front-end vai nos enviar
@@ -81,6 +85,7 @@ class UserController {
         }
     }
 
+    // Solicita a recuperação de senha e envia o e-mail com o link
     async requestPasswordReset(req, res) {
         try {
             const { email } = req.body;
@@ -105,6 +110,7 @@ class UserController {
         }
     }
 
+    // Valida o token e atualiza a senha do usuário
     async resetPassword(req, res) {
         try {
             const { token, newPassword } = req.body;

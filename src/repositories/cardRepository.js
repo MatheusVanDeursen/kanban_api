@@ -34,6 +34,7 @@ class CardRepository {
         return result.rows[0];
     }
 
+    // Atualiza o título e/ou conteúdo de um card
     async updateText(cardId, title, content) {
         const query = `
             UPDATE cards 
@@ -45,6 +46,7 @@ class CardRepository {
         return result.rows[0];
     }
 
+    // Remove um card do banco de dados
     async delete(cardId) {
         const query = 'DELETE FROM cards WHERE id = $1 RETURNING id';
         const result = await db.query(query, [cardId]);

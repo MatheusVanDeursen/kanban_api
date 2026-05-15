@@ -37,6 +37,7 @@ class UserRepository {
         return result.rows[0];
     }
 
+    // Cria um registro de solicitação de recuperação de senha
     async createPasswordReset(userId, token, expiresAt) {
         const query = `
             INSERT INTO password_resets (user_id, token, expires_at)
@@ -45,6 +46,7 @@ class UserRepository {
         await db.query(query, [userId, token, expiresAt]);
     }
 
+    // Busca um token de recuperação válido (que não expirou)
     async findResetToken(token) {
         const query = `
             SELECT * FROM password_resets 
@@ -55,10 +57,12 @@ class UserRepository {
         return result.rows[0];
     }
 
+    // Remove todos os tokens de recuperação vinculados a um usuário
     async deleteResetTokens(userId) {
         await db.query('DELETE FROM password_resets WHERE user_id = $1', [userId]);
     }
 
+    // Atualiza a senha do usuário no banco de dados
     async updatePassword(userId, hashedPassword) {
         await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashedPassword, userId]);
     }

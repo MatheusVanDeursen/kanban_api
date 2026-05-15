@@ -12,6 +12,7 @@ class EmailService {
         });
     }
 
+    // Envia o e-mail de boas-vindas após o cadastro
     async sendWelcomeEmail(userEmail) {
         try {
             const mailOptions = {
@@ -44,6 +45,7 @@ class EmailService {
         }
     }
 
+    // Envia o e-mail com o link para recuperação de senha
     async sendResetEmail(userEmail, token) {
         const resetLink = `http://127.0.0.1:5500/reset-password.html?token=${token}`;
         
