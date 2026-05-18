@@ -20,14 +20,7 @@ Este projeto surgiu da  vontade de apreender como implementar umaa lógica de Dr
 
 ## 🖼️ Prévia do Quadro (Screenshot)
 
-> Coloque uma imagem do quadro para facilitar a visualização do projeto.
-
-![Preview do Kanban](./img/kanban-board.png)
-
-**Como adicionar a imagem**
-1. Crie a pasta `docs/images/` (se ainda não existir)
-2. Adicione um arquivo chamado `kanban-board.png` (ou ajuste o nome no link acima)
-3. Faça commit normalmente
+![Preview do Kanban](./img/kanban_board.png)
 
 ---
 
