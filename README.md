@@ -7,7 +7,7 @@ O objetivo deste repositório é fornecer uma base clara e consistente para as o
 
 ## 💡 Motivação
 
-Este projeto surgiu da  vontade de apreender como implementar umaa lógica de Drag & Drop. Eu queria uma ferramenta simples para me organizar e se possível melhorar minah produtividade de algum forma. Acabei optando por um quadro Kanban com inspiração estética no Sticky Notes. Ironicamnente, acabei usando o próprio quadro Kanban para planejar e executar o desenvolvimento do quadro Kanban. A partir disso, fui imaginando mais funcionalidades interessantes para explorar e adicionar nele. Esse é o resultado.
+Este projeto surgiu da vontade de aprender como implementar uma lógica de Drag & Drop. Eu queria uma ferramenta simples para me organizar e se possível melhorar minha produtividade de alguma forma. Acabei optando por um quadro Kanban com inspiração estética no Sticky Notes. Ironicamnente, acabei usando o próprio quadro Kanban para planejar e executar o desenvolvimento do quadro Kanban. A partir disso, fui imaginando mais funcionalidades interessantes para explorar e adicionar nele. Esse é o resultado.
 
 ---
 
@@ -122,13 +122,17 @@ A API oferece:
 
 ---
 
-### 📧 Recuperação de conta (reset de senha)
+### 📧 E-mails transacionais (Nodemailer)
 
-O fluxo de redefinição de senha foi desenhado para evitar vazamento de informação e melhorar segurança:
+Além do fluxo de autenticação, a API inclui envio de e-mails transacionais para melhorar a experiência do usuário em dois momentos principais:
 
-1. Validação silenciosa de existência do e-mail (reduz enumeração).
-2. Geração de token aleatório com `crypto`.
-3. Envio de e-mail transacional com `Nodemailer` e registro com expiração na tabela `password_resets`.
+- **Boas-vindas (cadastro):** após a criação da conta, um e-mail é enviado confirmando o registro e introduzindo a plataforma.
+- **Recuperação de senha:** geração de token aleatório e de alta entropia com expiração, enviado por e-mail para redefinição de credenciais.
+
+**Pontos considerados no desenho do fluxo:**
+- **Segurança contra enumeração:** o endpoint de recuperação pode responder de forma neutra, evitando confirmar se um e-mail existe ou não.
+- **Token com expiração:** o token é persistido com prazo estrito (ex.: tabela `password_resets`), reduzindo janela de abuso.
+- **Separação de responsabilidade:** o servidor concentra a lógica de emissão/validação do token e o disparo do e-mail, mantendo o cliente (front-end) enxuto.
 
 ---
 
