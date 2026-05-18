@@ -111,8 +111,6 @@ Neste projeto, colunas e cards utilizam um campo `position` (REAL) para minimiza
 
 Na prática, isso permite que um Drag & Drop seja refletido em **uma atualização principal**, reduzindo escrita em cascata e simplificando concorrência.
 
-> Observação: em cenários de uso prolongado, pode ser útil ter uma rotina de “rebalanceamento” (renormalização) das posições para evitar perda de precisão.  
-
 ---
 
 ### 🔐 Autenticação (JWT) e Login Social (Google OAuth 2.0)
