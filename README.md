@@ -1,69 +1,148 @@
 # Kanban Board API ⚙️
 
-Esta é a API RESTful construída para alimentar o projeto Kanban Board. Desenvolvida em **Node.js**, **Express** e **PostgreSQL**, ela gerencia toda a lógica de negócios, incluindo autenticação avançada de usuários e persistência de dados do quadro de forma segura e eficiente.
+API REST responsável por centralizar as regras de negócio do **Kanban Board**, incluindo persistência em banco relacional e autenticação.  
+O objetivo deste repositório é fornecer uma base clara e consistente para as operações do quadro (colunas, cards e usuários), priorizando integridade dos dados e facilidade de manutenção.
 
 ---
 
-## 🚀 Principais Tecnologias
+## 🔗 Links do Projeto
 
-- **Node.js** & **Express** → Roteamento e servidor
-- **PostgreSQL** & **pg** → Banco de dados relacional com uso de UUIDs
-- **JSON Web Token (JWT)** & **Bcrypt** → Autenticação local e criptografia
-- **Google Auth Library** → Validação stateless de login social
-- **Nodemailer** → Serviço de e-mails transacionais
+- 🌐 **Aplicação em Produção:** https://MatheusVanDeursen.github.io/kanban-web/  
+- 🎨 **Repositório do Frontend:** https://github.com/MatheusVanDeursen/kanban_web
 
 ---
 
-## ✨ Funcionalidades do Backend
+## 🖼️ Prévia do Quadro (Screenshot)
 
-- **Autenticação híbrida:** Suporte a login tradicional (e-mail/senha) e login social com Google (OAuth 2.0)
-- **Recuperação de conta:** Sistema completo de redefinição de senha com tokens temporários gerados via `crypto` e enviados por e-mail
-- **Sistema de notificações:** Envio automático de e-mails de boas-vindas
-- **Arquitetura de reordenação otimizada:** Utiliza **Isolamento de Estado com FLOAT** para movimentação de cards
-  - Em vez de sobrescrever posições inteiras, novos valores são calculados como:
-    ```text
-    (A + B) / 2
-    ```
-  - Isso permite apenas um `UPDATE` por operação de drag & drop, garantindo alta performance
+> Coloque uma imagem do quadro para facilitar a visualização do projeto.
+
+![Preview do Kanban](./docs/images/kanban-board.png)
+
+**Como adicionar a imagem**
+1. Crie a pasta `docs/images/` (se ainda não existir)
+2. Adicione um arquivo chamado `kanban-board.png` (ou ajuste o nome no link acima)
+3. Faça commit normalmente
+
+---
+
+## 📸 Arquitetura & Demonstração Visual
+
+### Fluxo de Comunicação da Infraestrutura
+
+A aplicação pode operar atrás de túneis reversos, permitindo auto-hospedagem da API sem exposição direta de portas no roteador. Isso ajuda em cenários com CGNAT e reduz a superfície de ataque ao evitar abertura de portas públicas desnecessárias.
+
+```mermaid
+graph LR
+    A[GitHub Pages<br/>Frontend Vanilla JS] -- HTTPS --> B((Cloudflare Tunnels))
+    B -- Túnel Seguro --> C[Debian Server<br/>Headless via SSH]
+    
+    subgraph Infraestrutura Local
+        C -- Roteamento Interno --> D(API Node.js<br/>Porta 3000)
+        D -- TCP/IP --> E[(Banco de Dados<br/>PostgreSQL)]
+    end
+    
+    classDef frontend fill:#222438,stroke:#e6b905,stroke-width:2px,color:#fff;
+    classDef cloud fill:#f48120,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef server fill:#4CAF50,stroke:#fff,stroke-width:2px,color:#fff;
+    
+    class A frontend;
+    class B cloud;
+    class D,E server;
+```
+
+### Diagrama de Entidade-Relacionamento (DER)
+
+A persistência utiliza PostgreSQL com `uuid-ossp` para geração de chaves primárias UUID, reduzindo risco de enumeração previsível de IDs e facilitando integração distribuída.
+
+```mermaid
+erDiagram
+    USERS ||--o{ COLUMNS : "possui"
+    COLUMNS ||--o{ CARDS : "contém"
+    USERS ||--o{ PASSWORD_RESETS : "solicita"
+
+    USERS {
+        UUID id PK
+        VARCHAR email
+        VARCHAR password_hash
+        VARCHAR auth_provider
+        VARCHAR provider_id
+        TIMESTAMP created_at
+    }
+    
+    COLUMNS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR title
+        VARCHAR color
+        REAL position
+        TIMESTAMP created_at
+    }
+    
+    CARDS {
+        UUID id PK
+        UUID column_id FK
+        VARCHAR title
+        TEXT content
+        REAL position
+        TIMESTAMP created_at
+    }
+
+    PASSWORD_RESETS {
+        SERIAL id PK
+        UUID user_id FK
+        TEXT token
+        TIMESTAMP expires_at
+        TIMESTAMP created_at
+    }
+```
 
 ---
 
-## 🛠️ Como rodar o projeto localmente
+## ✨ Decisões de Engenharia
 
-### 1. Clone o repositório
+### 📌 Ordenação com `REAL` para reordenação eficiente
 
-```bash
-git clone https://github.com/MatheusVanDeursen/kanban_api
-cd kanban-api
-```
+Em quadros Kanban, mover itens pode gerar reindexações custosas quando a ordenação depende de índices inteiros (1, 2, 3…), exigindo múltiplos `UPDATE`s.
 
-### 2. Instale as dependências
+Neste projeto, colunas e cards utilizam um campo `position` (REAL) para minimizar reordenações:
 
-```bash
-npm install
-```
+- Ao mover para o topo: `position = próximo / 2`
+- Ao mover para o final: `position = anterior + 1.0`
+- Ao inserir entre dois itens (A e B): `position = (A + B) / 2`
 
-### 3. Configure as variáveis de ambiente
+Na prática, isso permite que um Drag & Drop seja refletido em **uma atualização principal**, reduzindo escrita em cascata e simplificando concorrência.
 
-Crie um arquivo `.env` na raiz do projeto:
-
-```env
-PORT=3000
-DB_USER=postgres
-DB_HOST=localhost
-DB_NAME=kanban_db
-DB_PASSWORD=sua_senha_do_banco
-DB_PORT=5432
-JWT_SECRET=sua_chave_secreta_jwt
-GOOGLE_CLIENT_ID=seu_client_id_do_google
-EMAIL_USER=seu_email_profissional@gmail.com
-EMAIL_PASS=sua_senha_de_app_do_google
-```
-
-### 4. Inicie o servidor
-
-```bash
-node src/server.js
-```
+> Observação: em cenários de uso prolongado, pode ser útil ter uma rotina de “rebalanceamento” (renormalização) das posições para evitar perda de precisão.  
 
 ---
+
+### 🔐 Autenticação (JWT) e Login Social (Google OAuth 2.0)
+
+A API oferece:
+
+- **Autenticação nativa** com `bcrypt` para hash de senhas e emissão de **JWT**.
+- **Login com Google OAuth 2.0**, validando credenciais do cliente e emitindo um JWT do próprio sistema após verificação.
+
+---
+
+### 📧 Recuperação de conta (reset de senha)
+
+O fluxo de redefinição de senha foi desenhado para evitar vazamento de informação e melhorar segurança:
+
+1. Validação silenciosa de existência do e-mail (reduz enumeração).
+2. Geração de token aleatório com `crypto`.
+3. Envio de e-mail transacional com `Nodemailer` e registro com expiração na tabela `password_resets`.
+
+---
+
+### 🧱 Integridade no banco e validações
+
+A modelagem foi criada com integridade referencial e deleções em cascata (`ON DELETE CASCADE`) quando apropriado, evitando registros órfãos.  
+Nas rotas de atualização (`PATCH`), há validações para reduzir chances de dados inválidos chegarem ao banco.
+
+---
+
+## 🗄️ Inicialização do Banco de Dados
+
+A modelagem e criação das tabelas estão versionadas no arquivo `scriptSQL.sql`, incluindo extensões e estrutura de relacionamento.
+
