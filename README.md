@@ -5,9 +5,15 @@ O objetivo deste repositório é fornecer uma base clara e consistente para as o
 
 ---
 
+## 💡 Motivação
+
+Este projeto surgiu da  vontade de apreender como implementar umaa lógica de Drag & Drop. Eu queria uma ferramenta simples para me organizar e se possível melhorar minah produtividade de algum forma. Acabei optando por um quadro Kanban. Ironicamnente, acabei usando o próprio quadro Kanban para planejar e executar o desenvolvimento do quadro Kanban. A partir disso, fui imaginando mais funcionalidades interessantes para explorar e adicionar nele. Esse é o resultado.
+
+---
+
 ## 🔗 Links do Projeto
 
-- 🌐 **Aplicação em Produção:** https://MatheusVanDeursen.github.io/kanban-web/  
+- 🌐 **Aplicação em Produção:** https://kanban.matheusvandeursen.com
 - 🎨 **Repositório do Frontend:** https://github.com/MatheusVanDeursen/kanban_web
 
 ---
@@ -16,7 +22,7 @@ O objetivo deste repositório é fornecer uma base clara e consistente para as o
 
 > Coloque uma imagem do quadro para facilitar a visualização do projeto.
 
-![Preview do Kanban](./docs/images/kanban-board.png)
+![Preview do Kanban](./img/kanban-board.png)
 
 **Como adicionar a imagem**
 1. Crie a pasta `docs/images/` (se ainda não existir)
